@@ -5,7 +5,7 @@
 PROJECT_NAME = hello_world
 
 # Device series, options: NRf51, NRf52
-DEVICE_SERIES := NRF52
+DEVICE_SERIES := NRF51
 # Device variant code (memory options), options: AA, AB, AC
 DEVICE_VARIANT := AA
 
@@ -13,7 +13,7 @@ DEVICE_VARIANT := AA
 # Key path variables required by remainder of make configuration
 # ---------------------------------------------------------------------------
 PROJECT_BASE_DIR := $(CURDIR)
-UCTOOLS_DIR      := $(PROJECT_BASE_DIR)/tools
+UCTOOLS_DIR      := $(PROJECT_BASE_DIR)/build
 SDK_BASE_DIR     := $(PROJECT_BASE_DIR)/external/nrf5x_sdk
 
 include $(UCTOOLS_DIR)/uc.mk
