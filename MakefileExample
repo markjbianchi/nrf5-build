@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# Key project variables required by remainder of make configuration
+# ---------------------------------------------------------------------------
+
+PROJECT_NAME = hello_world
+
+# Device series, options: NRf51, NRf52
+DEVICE_SERIES := NRF52
+# Device variant code (memory options), options: AA, AB, AC
+DEVICE_VARIANT := AA
+
+# ---------------------------------------------------------------------------
+# Key path variables required by remainder of make configuration
+# ---------------------------------------------------------------------------
+PROJECT_BASE_DIR := $(CURDIR)
+UCTOOLS_DIR      := $(PROJECT_BASE_DIR)/tools
+SDK_BASE_DIR     := $(PROJECT_BASE_DIR)/external/nrf5x_sdk
+
+include $(UCTOOLS_DIR)/uc.mk
+
+# ---------------------------------------------------------------------------
+# Project-specific compile related variables
+# ---------------------------------------------------------------------------
+# unique compile options
+CFLAGS   += -Wno-unused-function
+
+# unique C preprocessor options (defines such as -Dxxx or -Dyyy=zzz)
+CPPFLAGS +=
+
+# specify the include directories needed to compile
+INCLUDE_DIRS += $(SDK_BASE_DIR)/components/toolchain/gcc \
+				        $(SDK_BASE_DIR)/components/toolchain \
+				        $(SDK_BASE_DIR)/components/toolchain/CMSIS/Include \
+				        $(SDK_BASE_DIR)/components/device \
+				        $(SDK_BASE_DIR)/components/drivers_nrf/delay \
+				        $(SDK_BASE_DIR)/components/drivers_nrf/hal
+
+# compiled libraries to link against, e.g. -lm, -lpthread, ...
+LIBS += -lm
+
+# project-specific linker file
+LINKER_SCRIPT = $(PROJECT_BASE_DIR)/$(PROJECT_NAME).ld
+
+# ---------------------------------------------------------------------------
+# Various source file related variables
+# ---------------------------------------------------------------------------
+# source files required to build the executable
+SOURCE += $(SDK_BASE_DIR)/components/drivers_nrf/delay/nrf_delay.c \
+          src/main.c
+
+#----------------------------------------------------------------------------
+# Include the previously generated dependency files in $BUILD_DIR
+#----------------------------------------------------------------------------
+ifeq ($(NEED_DEP_FILES),1)
+  ifneq ($(strip $(DEP_FILES)),)
+    -include $(DEP_FILES)
+  endif
+endif
+
+# ***************************************************************************
+# Target definitions ********************************************************
+# ***************************************************************************
+all : build
+
+build : BEGIN=$(PROJECT_NAME)
+build : begin init $(PROJECT_BINFILE) end
+
+# Rule for compiling and linking main
+$(PROJECT_BINFILE) : $(OBJ_FILES)
+	@echo "       [ld] linking $@"
+	$(Q)$(LINKER) $(OBJ_FILES) $(LIBS) -o $@
+	@echo "       [ld] $(notdir $@) built"
+	$(elapsed-time)
+
+
+# Generate the rules for all the C files
+$(foreach src, $(C_FILES), $(eval $(call compile-c-file,$(src))))
+
+# Generate the rules for all the assembly files
+$(foreach src, $(ASM_FILES), $(eval $(call compile-asm-file,$(src))))
+
